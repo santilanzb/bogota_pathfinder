@@ -16,38 +16,52 @@ class RouteOptimizer:
         
         destination = self.grid.establishments[destination_name]
         
-        # Calcular primera ruta para Javier (sin restricciones)
-        javier_path, javier_time = self.pathfinder.find_shortest_path(
+        # Opción 1: Javier primero, Andreína evita a Javier
+        javier_path_1, javier_time_1 = self.pathfinder.find_shortest_path(
             self.grid.javier_home, destination
         )
         
-        if not javier_path:
+        if not javier_path_1:
             return {'error': 'No se pudo encontrar una ruta válida para Javier'}
         
-        # Extraer las aristas (cuadras) que usa Javier
-        javier_edges = self._get_path_edges(javier_path)
-        
-        # Calcular ruta para Andreína evitando las cuadras de Javier
-        andreina_path, andreina_time = self.pathfinder.find_shortest_path(
-            self.grid.andreina_home, destination, blocked_edges=javier_edges
+        javier_edges_1 = self._get_path_edges(javier_path_1)
+        andreina_path_1, andreina_time_1 = self.pathfinder.find_shortest_path(
+            self.grid.andreina_home, destination, blocked_edges=javier_edges_1
         )
         
-        # Si Andreína no puede llegar evitando a Javier, intentar al revés
-        if not andreina_path:
-            andreina_path, andreina_time = self.pathfinder.find_shortest_path(
-                self.grid.andreina_home, destination
-            )
+        # Opción 2: Andreína primero, Javier evita a Andreína
+        andreina_path_2, andreina_time_2 = self.pathfinder.find_shortest_path(
+            self.grid.andreina_home, destination
+        )
+        
+        if not andreina_path_2:
+            return {'error': 'No se pudo encontrar una ruta válida para Andreína'}
+        
+        andreina_edges_2 = self._get_path_edges(andreina_path_2)
+        javier_path_2, javier_time_2 = self.pathfinder.find_shortest_path(
+            self.grid.javier_home, destination, blocked_edges=andreina_edges_2
+        )
+        
+        # Comparar ambas opciones y elegir la mejor (menor tiempo total)
+        if andreina_path_1 and javier_path_2:
+            total_time_1 = max(javier_time_1, andreina_time_1)
+            total_time_2 = max(javier_time_2, andreina_time_2)
             
-            if not andreina_path:
-                return {'error': 'No se pudo encontrar una ruta válida'}
-            
-            andreina_edges = self._get_path_edges(andreina_path)
-            javier_path, javier_time = self.pathfinder.find_shortest_path(
-                self.grid.javier_home, destination, blocked_edges=andreina_edges
-            )
-            
-            if not javier_path:
-                return {'error': 'No se pudieron encontrar rutas sin cruces'}
+            # Elegir la opción con menor tiempo total
+            if total_time_1 <= total_time_2:
+                javier_path, javier_time = javier_path_1, javier_time_1
+                andreina_path, andreina_time = andreina_path_1, andreina_time_1
+            else:
+                javier_path, javier_time = javier_path_2, javier_time_2
+                andreina_path, andreina_time = andreina_path_2, andreina_time_2
+        elif andreina_path_1:
+            javier_path, javier_time = javier_path_1, javier_time_1
+            andreina_path, andreina_time = andreina_path_1, andreina_time_1
+        elif javier_path_2:
+            javier_path, javier_time = javier_path_2, javier_time_2
+            andreina_path, andreina_time = andreina_path_2, andreina_time_2
+        else:
+            return {'error': 'No se pudieron encontrar rutas sin cruces'}
         
         sync_info = self._calculate_synchronization(javier_time, andreina_time)
         

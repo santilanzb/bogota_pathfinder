@@ -15,10 +15,11 @@ class GridVisualizer:
         fig, ax = plt.subplots(figsize=(10, 8))
         
         # Configurar límites y etiquetas
-        ax.set_xlim(self.grid.carrera_min - 0.5, self.grid.carrera_max + 0.5)
+        # Invertir eje X: carreras crecen de este (10) a oeste (15)
+        ax.set_xlim(self.grid.carrera_max + 0.5, self.grid.carrera_min - 0.5)
         ax.set_ylim(self.grid.calle_min - 0.5, self.grid.calle_max + 0.5)
-        ax.set_xlabel('Carrera', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Calle', fontsize=12, fontweight='bold')
+        ax.set_xlabel('Carrera (10=Este, 15=Oeste)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Calle (aumenta hacia el Norte)', fontsize=12, fontweight='bold')
         ax.set_title('Cuadrícula de Bogotá - Rutas Óptimas', fontsize=14, fontweight='bold')
         
         # Grilla

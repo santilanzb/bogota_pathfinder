@@ -36,30 +36,30 @@ class BogotaGrid:
         """
         # Verificar que son adyacentes (solo movimiento horizontal o vertical)
         if from_loc.calle == to_loc.calle:
-            # Movimiento horizontal (cambio de carrera)
+            # Movimiento horizontal ESTE-OESTE (a lo largo de una calle)
             if abs(from_loc.carrera - to_loc.carrera) != 1:
                 return None
             
-            # Determinar qué carrera se está usando
-            carrera = min(from_loc.carrera, to_loc.carrera)
-            
-            # Carreras 11, 12, 13 tienen aceras en mal estado (7 minutos)
-            if carrera in [11, 12, 13]:
-                return 7
-            else:
-                return 5
-                
-        elif from_loc.carrera == to_loc.carrera:
-            # Movimiento vertical (cambio de calle)
-            if abs(from_loc.calle - to_loc.calle) != 1:
-                return None
-            
-            # Determinar qué calle se está usando
-            calle = min(from_loc.calle, to_loc.calle)
+            # La calle que se está usando determina el tiempo
+            calle = from_loc.calle
             
             # Calle 51 tiene mucha actividad comercial (10 minutos)
             if calle == 51:
                 return 10
+            else:
+                return 5
+                
+        elif from_loc.carrera == to_loc.carrera:
+            # Movimiento vertical NORTE-SUR (a lo largo de una carrera)
+            if abs(from_loc.calle - to_loc.calle) != 1:
+                return None
+            
+            # La carrera que se está usando determina el tiempo
+            carrera = from_loc.carrera
+            
+            # Carreras 11, 12, 13 tienen aceras en mal estado (7 minutos)
+            if carrera in [11, 12, 13]:
+                return 7
             else:
                 return 5
         else:
