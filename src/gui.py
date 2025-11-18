@@ -330,6 +330,22 @@ class AddEstablishmentDialog:
             messagebox.showerror("Error", f"La carrera debe estar entre {self.grid.carrera_min} y {self.grid.carrera_max}")
             return
         
+        # Verificar si la ubicación ya está ocupada
+        location = Location(calle, carrera)
+        if self.grid.is_location_occupied(location):
+            # Identificar qué está ocupando esa ubicación
+            if location == self.grid.javier_home:
+                messagebox.showerror("Error", f"La ubicación Calle {calle} con Carrera {carrera} está ocupada por la casa de Javier")
+            elif location == self.grid.andreina_home:
+                messagebox.showerror("Error", f"La ubicación Calle {calle} con Carrera {carrera} está ocupada por la casa de Andreína")
+            else:
+                # Buscar el nombre del establecimiento en esa ubicación
+                for est_name, est_loc in self.grid.establishments.items():
+                    if est_loc == location:
+                        messagebox.showerror("Error", f"La ubicación Calle {calle} con Carrera {carrera} ya está ocupada por '{est_name}'")
+                        break
+            return
+        
         if self.grid.add_establishment(name, calle, carrera):
             self.result = {'name': name, 'calle': calle, 'carrera': carrera}
             self.dialog.destroy()

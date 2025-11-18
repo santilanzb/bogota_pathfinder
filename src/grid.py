@@ -89,11 +89,26 @@ class BogotaGrid:
         return (self.calle_min <= location.calle <= self.calle_max and
                 self.carrera_min <= location.carrera <= self.carrera_max)
     
+    def is_location_occupied(self, location: Location) -> bool:
+        """Verifica si una ubicación está ocupada por un establecimiento, Javier o Andreína"""
+        # Verificar si es la casa de Javier o Andreína
+        if location == self.javier_home or location == self.andreina_home:
+            return True
+        
+        # Verificar si ya existe un establecimiento en esa ubicación
+        for est_location in self.establishments.values():
+            if est_location == location:
+                return True
+        
+        return False
+    
     def add_establishment(self, name: str, calle: int, carrera: int) -> bool:
         location = Location(calle, carrera)
         if not self.is_valid_location(location):
             return False
         if name in self.establishments:
+            return False
+        if self.is_location_occupied(location):
             return False
         self.establishments[name] = location
         return True
