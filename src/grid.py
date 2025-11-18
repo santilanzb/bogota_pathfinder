@@ -88,3 +88,18 @@ class BogotaGrid:
     def is_valid_location(self, location: Location) -> bool:
         return (self.calle_min <= location.calle <= self.calle_max and
                 self.carrera_min <= location.carrera <= self.carrera_max)
+    
+    def add_establishment(self, name: str, calle: int, carrera: int) -> bool:
+        location = Location(calle, carrera)
+        if not self.is_valid_location(location):
+            return False
+        if name in self.establishments:
+            return False
+        self.establishments[name] = location
+        return True
+    
+    def remove_establishment(self, name: str) -> bool:
+        if name in self.establishments:
+            del self.establishments[name]
+            return True
+        return False
