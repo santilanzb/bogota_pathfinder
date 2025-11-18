@@ -24,9 +24,13 @@ bogota_pathfinder/
 │   ├── grid.py               # Clase BogotaGrid (modelo de la cuadrícula)
 │   ├── pathfinder.py         # Clase PathFinder (algoritmo de Dijkstra)
 │   ├── route_optimizer.py    # Clase RouteOptimizer (optimización de rutas)
-│   └── display.py            # Funciones de visualización
+│   ├── display.py            # Funciones de visualización (terminal)
+│   ├── visualizer.py         # Visualización del grafo con matplotlib
+│   └── gui.py                # Interfaz gráfica con tkinter
 │
-├── main.py                   # Punto de entrada principal
+├── main.py                   # Versión terminal
+├── main_gui.py               # Versión con interfaz gráfica
+├── GRID_MAP.txt              # Mapa visual de la cuadrícula
 └── README.md                 # Este archivo
 ```
 
@@ -54,7 +58,24 @@ bogota_pathfinder/
 
 ## Uso
 
-### Ejecutar el programa
+### Interfaz Gráfica (Recomendado)
+
+Ejecuta el programa con interfaz gráfica:
+
+```bash
+python main_gui.py
+```
+
+**Características de la GUI:**
+- 📊 Visualización del grafo con las rutas en tiempo real
+- 👁️ Colores diferenciados para cada ruta (Javier en azul, Andreína en rojo)
+- 🏷️ Identificación visual de zonas con tiempos especiales
+- 📊 Panel de resultados con toda la información de sincronización
+- 🖱️ Interfaz intuitiva con botones de radio para selección
+
+### Terminal (Alternativa)
+
+También puedes usar la versión por terminal:
 
 ```bash
 python main.py
@@ -102,7 +123,21 @@ Implementa `PathFinder` con el algoritmo de Dijkstra para encontrar caminos ópt
 `RouteOptimizer` coordina las rutas de ambas personas y calcula la sincronización.
 
 ### `display.py`
-Funciones de formateo y visualización de resultados.
+Funciones de formateo y visualización de resultados para la terminal.
+
+### `visualizer.py`
+Generación de gráficos con matplotlib:
+- Dibuja la cuadrícula completa
+- Marca zonas con tiempos especiales
+- Visualiza las rutas calculadas
+- Diferencia colores para cada persona
+
+### `gui.py`
+Interfaz gráfica con tkinter:
+- Panel de control con radio buttons
+- Visualización del grafo en tiempo real
+- Panel de resultados con scroll
+- Diseño responsivo y colorido
 
 ## Extensibilidad
 

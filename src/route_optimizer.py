@@ -1,50 +1,54 @@
-from typing import Dict
+from typing import Dict, Set, Tuple
 from src.grid import BogotaGrid
 from src.pathfinder import PathFinder
+from src.location import Location
 
 
 class RouteOptimizer:
-    """Optimiza las rutas para que Javier y Andreína lleguen simultáneamente"""
     
     def __init__(self, grid: BogotaGrid):
-        """
-        Inicializa el optimizador de rutas
-        
-        Args:
-            grid: Instancia de BogotaGrid
-        """
         self.grid = grid
         self.pathfinder = PathFinder(grid)
     
     def optimize_routes(self, destination_name: str) -> Dict:
-        """
-        Calcula las rutas óptimas para Javier y Andreína
-        
-        Args:
-            destination_name: Nombre del establecimiento destino
-            
-        Returns:
-            Diccionario con toda la información de las rutas y sincronización
-        """
         if destination_name not in self.grid.establishments:
             return {'error': f'Establecimiento "{destination_name}" no encontrado'}
         
         destination = self.grid.establishments[destination_name]
         
-        # Calcular rutas óptimas para cada persona
+        # Calcular primera ruta para Javier (sin restricciones)
         javier_path, javier_time = self.pathfinder.find_shortest_path(
             self.grid.javier_home, destination
         )
         
+        if not javier_path:
+            return {'error': 'No se pudo encontrar una ruta válida para Javier'}
+        
+        # Extraer las aristas (cuadras) que usa Javier
+        javier_edges = self._get_path_edges(javier_path)
+        
+        # Calcular ruta para Andreína evitando las cuadras de Javier
         andreina_path, andreina_time = self.pathfinder.find_shortest_path(
-            self.grid.andreina_home, destination
+            self.grid.andreina_home, destination, blocked_edges=javier_edges
         )
         
-        # Validar que existen rutas
-        if not javier_path or not andreina_path:
-            return {'error': 'No se pudo encontrar una ruta válida'}
+        # Si Andreína no puede llegar evitando a Javier, intentar al revés
+        if not andreina_path:
+            andreina_path, andreina_time = self.pathfinder.find_shortest_path(
+                self.grid.andreina_home, destination
+            )
+            
+            if not andreina_path:
+                return {'error': 'No se pudo encontrar una ruta válida'}
+            
+            andreina_edges = self._get_path_edges(andreina_path)
+            javier_path, javier_time = self.pathfinder.find_shortest_path(
+                self.grid.javier_home, destination, blocked_edges=andreina_edges
+            )
+            
+            if not javier_path:
+                return {'error': 'No se pudieron encontrar rutas sin cruces'}
         
-        # Calcular información de sincronización
         sync_info = self._calculate_synchronization(javier_time, andreina_time)
         
         return {
@@ -62,6 +66,13 @@ class RouteOptimizer:
             },
             'synchronization': sync_info
         }
+    
+    def _get_path_edges(self, path: list) -> Set[Tuple[Location, Location]]:
+        edges = set()
+        for i in range(len(path) - 1):
+            edge = (path[i], path[i + 1])
+            edges.add(edge)
+        return edges
     
     def _calculate_synchronization(self, javier_time: int, andreina_time: int) -> Dict:
         time_difference = abs(javier_time - andreina_time)

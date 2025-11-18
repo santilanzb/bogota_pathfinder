@@ -1,5 +1,5 @@
 import heapq
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set
 from src.location import Location
 from src.grid import BogotaGrid
 
@@ -16,21 +16,11 @@ class PathFinder:
         """
         self.grid = grid
     
-    def find_shortest_path(self, start: Location, end: Location) -> Tuple[List[Location], int]:
-        """
-        Encuentra el camino más corto usando el algoritmo de Dijkstra
+    def find_shortest_path(self, start: Location, end: Location, blocked_edges: Set[Tuple[Location, Location]] = None) -> Tuple[List[Location], int]:
+        if blocked_edges is None:
+            blocked_edges = set()
         
-        Args:
-            start: Ubicación de inicio
-            end: Ubicación de destino
-            
-        Returns:
-            Tupla con (lista de ubicaciones en el camino, tiempo total en minutos)
-        """
-        # Priority queue: (tiempo_acumulado, ubicación)
         pq = [(0, start)]
-        
-        # Diccionarios para tracking
         distances: Dict[Location, int] = {start: 0}
         previous: Dict[Location, Location] = {start: None}
         visited = set()
@@ -43,14 +33,18 @@ class PathFinder:
             
             visited.add(current_loc)
             
-            # Si llegamos al destino, reconstruir el camino
             if current_loc == end:
                 path = self._reconstruct_path(previous, end)
                 return path, current_time
             
-            # Explorar vecinos
             for neighbor, travel_time in self.grid.get_neighbors(current_loc):
                 if neighbor in visited:
+                    continue
+                
+                # Verificar si esta arista está bloqueada (Javier y Andreína no pueden caminar juntos)
+                edge = (current_loc, neighbor)
+                edge_reverse = (neighbor, current_loc)
+                if edge in blocked_edges or edge_reverse in blocked_edges:
                     continue
                 
                 new_time = current_time + travel_time
@@ -60,7 +54,6 @@ class PathFinder:
                     previous[neighbor] = current_loc
                     heapq.heappush(pq, (new_time, neighbor))
         
-        # No se encontró camino
         return [], float('inf')
     
     def _reconstruct_path(self, previous: Dict[Location, Location], end: Location) -> List[Location]:
